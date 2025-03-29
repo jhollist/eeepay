@@ -14,5 +14,7 @@ eee_read_pay_stub <- function(path){
   pdftxt <- pdftools::pdf_text(path)
   pdftxt <- stringr::str_split(pdftxt, "[ ]{2,}")
   pdftxt <- unlist(pdftxt)
-  pdftxt
+  pdftxt <- stringr::str_split(pdftxt, "\n")
+  pdftxt <- unlist(pdftxt)
+  pdftxt[pdftxt != ""]
 }

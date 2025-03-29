@@ -10,18 +10,25 @@
 #' my_pay_stub <- eee_read_pay_stub(path)
 #' eee_payments(my_pay_stub)
 eee_payments <- function(pay_stub){
-  pp_begin_idx <- which(grepl("Pay Begin Date", pay_stub))[1] + 1
-  gp_cur_idx <- which(grepl("\nGross Pay", pay_stub))[1] + 1
-  gp_ytd_idx <- which(grepl("\nGross Pay", pay_stub))[1] + 2
-  np_idx <- which(grepl("\nNet Pay", pay_stub))[1] + 1
-  pp_begin <- lubridate::mdy(pay_stub[pp_begin_idx])
+  pp_begin <- eee_dates(pay_stub)$pay_period_begin
+  gp_cur_idx <- which(grepl("Gross Pay", pay_stub))[1] + 1
+  #gp_ytd_idx <- which(grepl("Gross Pay", pay_stub))[1] + 2
+  np_idx <- which(grepl("Net Pay", pay_stub))[1] + 2
   gp_cur <- stringr::str_split(pay_stub[gp_cur_idx], " ")[[1]][1]
   gp_cur <- as.numeric(stringr::str_remove(gp_cur, ","))
-  gp_ytd <- stringr::str_split(pay_stub[gp_ytd_idx], " ")[[1]][1]
+  gp_ytd <- stringr::str_split(pay_stub[gp_cur_idx], " ")[[1]][2]
   gp_ytd <- as.numeric(stringr::str_remove(gp_ytd, ","))
-  np <- stringr::str_split(pay_stub[np_idx], " ")[[1]][1]
+  if(is.na(gp_ytd)){
+    gp_ytd <- stringr::str_split(pay_stub[gp_cur_idx + 1], " ")[[1]][1]
+    gp_ytd <- as.numeric(stringr::str_remove(gp_ytd, ","))
+  }
+  np <- stringr::str_split(pay_stub[np_idx], " ")[[1]][2]
   np <- as.numeric(stringr::str_remove(np, ","))
-  browser()
+  if(is.na(np)){
+    np <- stringr::str_split(pay_stub[np_idx], " ")[[1]][1]
+    np <- as.numeric(stringr::str_remove(np, "[$,]"))
+  }
+  #browser()
   tibble::tibble(pay_period_begin = pp_begin, gross_pay_current = gp_cur,
                  gross_pay_ytd = gp_ytd, net_pay = np)
 }

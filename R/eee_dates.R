@@ -10,14 +10,18 @@
 #' my_pay_stub <- eee_read_pay_stub(path)
 #' eee_dates(my_pay_stub)
 eee_dates <- function(pay_stub){
+
   pp_end_idx <- which(grepl("Net Pay", pay_stub))[1] + 1
-  p_date_idx <- which(grepl("\n\nName", pay_stub))[1]
-  sc_date_idx <- which(grepl("\nService Comp Date", pay_stub))[1] + 1
-  pp_begin_idx <- which(grepl("Pay Begin Date", pay_stub))[1] + 1
+  p_date_idx <- which(grepl("Name", pay_stub))[1] - 1
+  sc_date_idx <- which(grepl("Service Comp Date", pay_stub))[1] + 1
+  pp_begin_idx <- which(grepl("Pay Begin Date", pay_stub))[1]
   pp_end <- lubridate::mdy(pay_stub[pp_end_idx])
   p_date <- lubridate::mdy(pay_stub[p_date_idx])
   sc_date <- lubridate::mdy(pay_stub[sc_date_idx])
-  pp_begin <- lubridate::mdy(pay_stub[pp_begin_idx])
+  pp_begin <- lubridate::mdy(stringr::str_remove(pay_stub[pp_begin_idx], "Pay Begin Date"))
+  if(is.na(pp_begin)){
+    pp_begin <- lubridate::mdy(pay_stub[pp_begin_idx + 1])
+  }
   tibble::tibble(pay_period_begin = pp_begin, pay_period_end = pp_end,
          pay_date = p_date, service_comp_date = sc_date)
 }
