@@ -16,5 +16,13 @@ devtools::install_github("jhollist/eeepay")
 
 ```{r}
 library(eeepay)
-pay_path <- 
+pay_path <- system.file("data/les_sample.pdf", package = "eeepay")
+pay_stub <- eee_read_pay_stub(pay_path)
+pay_dates <- eee_dates(pay_stub)
+pay_payments <- eee_payments(pay_stub)
+pay_df <- dplyr::left_join(pay_dates, pay_payments)
+pay_df
 ```
+
+
+
